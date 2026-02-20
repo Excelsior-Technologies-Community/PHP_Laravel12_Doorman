@@ -1,4 +1,4 @@
-# PHP_Laravel12_Doorman
+<img width="1887" height="952" alt="Screenshot 2026-02-20 172455" src="https://github.com/user-attachments/assets/c7acc5d5-bd95-4aca-87b8-5cbaf44007d7" /><img width="1887" height="952" alt="Screenshot 2026-02-20 172455" src="https://github.com/user-attachments/assets/c7acc5d5-bd95-4aca-87b8-5cbaf44007d7" /><img width="1887" height="952" alt="Screenshot 2026-02-20 172455" src="https://github.com/user-attachments/assets/120baa83-8eed-4f4d-b162-43bd3e9849d2" /><img width="1887" height="952" alt="Screenshot 2026-02-20 172455" src="https://github.com/user-attachments/assets/120baa83-8eed-4f4d-b162-43bd3e9849d2" /># PHP_Laravel12_Doorman
 
 
 ## Project Description
@@ -881,7 +881,7 @@ This starts the Laravel development server and allows you to access the applicat
 ### Redeem Invite Cod:
 
 
-<img width="1891" height="963" alt="Screenshot 2026-02-20 172413" src="https://github.com/user-attachments/assets/919996b8-0f5b-4a95-b87b-d838ba17930a" />
+<img width="1887" height="952" alt="Screenshot 2026-02-20 172455" src="https://github.com/user-attachments/assets/df4a8b98-efea-4e8e-8274-c1118f9fbf5b" />
 
  <img width="1884" height="950" alt="Screenshot 2026-02-20 172505" src="https://github.com/user-attachments/assets/99131a5d-e611-4c62-9a23-8b9e4bcbfad0" />
 
