@@ -72,6 +72,11 @@
             background: #dc3545;
         }
 
+        /* NEW BUTTON */
+        .btn-dashboard {
+            background: #6f42c1;
+        }
+
         .btn:hover {
 
             transform: scale(1.05);
@@ -114,6 +119,11 @@
 
         <a href="/redeem" class="btn btn-redeem">
             Redeem Invite
+        </a>
+
+        <!-- ✅ NEW ADDED BUTTON -->
+        <a href="/invites" class="btn btn-dashboard">
+            Invite Dashboard (Live Search)
         </a>
 
         <div class="footer">
