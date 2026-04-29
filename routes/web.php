@@ -3,7 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DoormanController;
 
+
 Route::get('/', [DoormanController::class, 'index']);
+
+// Invite Dashboard (NEW PAGE)
+Route::get('/invites', [DoormanController::class, 'invitesPage']);
+Route::get('/search-invites', [DoormanController::class, 'searchInvites']);
+
 
 Route::get('/generate-single', [DoormanController::class, 'generateSingle']);
 
