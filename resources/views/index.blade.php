@@ -121,9 +121,9 @@
             Redeem Invite
         </a>
 
-        <!-- ✅ NEW ADDED BUTTON -->
-        <a href="/invites" class="btn btn-dashboard">
-            Invite Dashboard (Live Search)
+        <!-- Add this before the footer div -->
+        <a href="/invites" class="btn btn-dashboard" style="background: #6f42c1;">
+            Invite Dashboard
         </a>
 
         <div class="footer">
