@@ -6,18 +6,16 @@ use Illuminate\Http\Request;
 use Doorman;
 use Carbon\Carbon;
 use Clarkeash\Doorman\Exceptions\DoormanException;
-use Clarkeash\Doorman\Models\Invite;
+use App\Models\Invite;
+use Illuminate\Support\Facades\Auth;
 
 class DoormanController extends Controller
 {
-
-    // Show Home Page
     public function index()
     {
         return view('index');
     }
 
-    // Invites Dashboard Page
     public function invitesPage()
     {
         $invites = Invite::orderBy('created_at', 'desc')->paginate(10);
@@ -25,15 +23,11 @@ class DoormanController extends Controller
         return view('invites', compact('invites', 'stats'));
     }
 
-    // Get statistics
     private function getStats()
     {
         $total = Invite::count();
-        
-        // Check what columns exist
         $columns = \Schema::getColumnListing('invites');
         
-        // Active invites (not used)
         if(in_array('used', $columns)) {
             $active = Invite::where('used', 0)->count();
             $redeemed = Invite::where('used', '>', 0)->count();
@@ -45,8 +39,16 @@ class DoormanController extends Controller
             $redeemed = 0;
         }
         
-        // Expired invites (if expires_at column exists)
-        if(in_array('expires_at', $columns)) {
+        if(in_array('valid_until', $columns)) {
+            $expired = Invite::where('valid_until', '<', Carbon::now())
+                ->where(function($query) use ($columns) {
+                    if(in_array('used', $columns)) {
+                        $query->where('used', 0);
+                    } elseif(in_array('uses', $columns)) {
+                        $query->where('uses', 0);
+                    }
+                })->count();
+        } elseif(in_array('expires_at', $columns)) {
             $expired = Invite::where('expires_at', '<', Carbon::now())
                 ->where(function($query) use ($columns) {
                     if(in_array('used', $columns)) {
@@ -59,7 +61,6 @@ class DoormanController extends Controller
             $expired = 0;
         }
         
-        // Last 7 days invites
         $last7Days = [];
         for($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
@@ -73,7 +74,6 @@ class DoormanController extends Controller
         return compact('total', 'active', 'redeemed', 'expired', 'last7Days');
     }
 
-    // Live Search Invites
     public function searchInvites(Request $request)
     {
         $search = $request->get('search');
@@ -95,7 +95,6 @@ class DoormanController extends Controller
         return view('invites', compact('invites', 'stats'));
     }
 
-    // Delete single invite
     public function deleteInvite($id)
     {
         try {
@@ -107,7 +106,6 @@ class DoormanController extends Controller
         }
     }
 
-    // Bulk delete invites
     public function bulkDeleteInvites(Request $request)
     {
         try {
@@ -119,7 +117,6 @@ class DoormanController extends Controller
         }
     }
 
-    // Export invites to CSV
     public function exportInvites(Request $request)
     {
         $search = $request->get('search');
@@ -142,12 +139,11 @@ class DoormanController extends Controller
         $callback = function() use ($invites) {
             $file = fopen('php://output', 'w');
             
-            // Add headers
             fputcsv($file, ['ID', 'Code', 'Email', 'Max Uses', 'Used', 'Created At', 'Status']);
             
             foreach($invites as $invite) {
                 $used = $invite->used ?? $invite->uses ?? 0;
-                $maxUses = $invite->max_uses ?? 1;
+                $maxUses = $invite->max_uses ?? $invite->max ?? 1;
                 $status = ($used >= $maxUses) ? 'Redeemed' : 'Active';
                 
                 fputcsv($file, [
@@ -167,14 +163,13 @@ class DoormanController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    // Get invite details for modal
     public function getInviteDetails($id)
     {
         try {
             $invite = Invite::findOrFail($id);
             
             $used = $invite->used ?? $invite->uses ?? 0;
-            $maxUses = $invite->max_uses ?? 1;
+            $maxUses = $invite->max_uses ?? $invite->max ?? 1;
             $status = ($used >= $maxUses) ? 'Redeemed' : 'Active';
             
             return response()->json([
@@ -195,17 +190,19 @@ class DoormanController extends Controller
         }
     }
 
-    // Generate single invite
     public function generateSingle()
     {
         $invite = Doorman::generate()->once();
+        
+        $invite->created_by = Auth::id();
+        $invite->valid_until = Carbon::now()->addDays(1);
+        $invite->save();
 
         return view('result', [
             'message' => 'Single Invite Code Generated: ' . $invite->code
         ]);
     }
 
-    // Generate multiple invites
     public function generateMultiple()
     {
         $invites = Doorman::generate()
@@ -216,6 +213,10 @@ class DoormanController extends Controller
 
         foreach($invites as $invite)
         {
+            $invite->created_by = Auth::id();
+            $invite->valid_until = Carbon::now()->addDays(1);
+            $invite->save();
+            
             $codes[] = $invite->code;
         }
 
@@ -224,37 +225,40 @@ class DoormanController extends Controller
         ]);
     }
 
-    // Generate invite with expiry
     public function generateExpiry()
     {
         $invite = Doorman::generate()
                     ->expiresIn(7)
                     ->once();
+                    
+        $invite->created_by = Auth::id();
+        $invite->save();
 
         return view('result', [
             'message' => 'Invite Code with 7 days expiry: ' . $invite->code
         ]);
     }
 
-    // Generate invite with email
     public function generateEmail()
     {
         $invite = Doorman::generate()
                     ->for('test@gmail.com')
                     ->once();
+                    
+        $invite->created_by = Auth::id();
+        $invite->valid_until = Carbon::now()->addDays(1);
+        $invite->save();
 
         return view('result', [
             'message' => 'Invite Code for test@gmail.com: ' . $invite->code
         ]);
     }
 
-    // Show redeem form
     public function redeemForm()
     {
         return view('redeem');
     }
 
-    // Redeem invite
     public function redeem(Request $request)
     {
         try {

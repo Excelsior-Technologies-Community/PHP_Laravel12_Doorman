@@ -7,6 +7,7 @@
                 </th>
                 <th>ID</th>
                 <th>Invite Code</th>
+                <th>Created By</th>
                 <th>Email</th>
                 <th>Status</th>
                 <th>Used / Max</th>
@@ -18,8 +19,9 @@
             @foreach($invites as $invite)
                 @php
                     $used = $invite->used ?? $invite->uses ?? 0;
-                    $maxUses = $invite->max_uses ?? 1;
+                    $maxUses = $invite->max_uses ?? $invite->max ?? 1;
                     $isRedeemed = $used >= $maxUses;
+                    $isExpired = ($invite->valid_until && \Carbon\Carbon::parse($invite->valid_until)->isPast()) || ($invite->expires_at && \Carbon\Carbon::parse($invite->expires_at)->isPast());
                 @endphp
                 <tr>
                     <td>
@@ -29,9 +31,12 @@
                     <td>
                         <span class="code-text">{{ $invite->code }}</span>
                     </td>
+                    <td>{{ $invite->creator ? $invite->creator->name : 'System/Admin' }}</td>
                     <td>{{ $invite->for ?? 'Not specified' }}</td>
                     <td>
-                        @if($isRedeemed)
+                        @if($isExpired)
+                            <span class="badge badge-expired" style="background-color: #fecaca; color: #991b1b; padding: 0.25rem 0.5rem; rounded: 9999px; text-size: 0.75rem;">Expired</span>
+                        @elseif($isRedeemed)
                             <span class="badge badge-redeemed">Redeemed</span>
                         @else
                             <span class="badge badge-active">Active</span>
